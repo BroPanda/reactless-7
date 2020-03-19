@@ -67,7 +67,7 @@ class App extends Component {
             kill cmp
           </button>
           {/* <button onClick={() => this.setState({ renderCmp: false })}>
-            switch user
+            switch user1
           </button> */}
         </div>
         {renderCmp ? <MyCmp userId="10002" /> : <p>good bye</p>}
