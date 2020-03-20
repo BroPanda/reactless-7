@@ -15,19 +15,34 @@ const API = {
 class MyCmp extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       timesTamp: new Date(),
-      messages: []
+      ...this.getEmptyMessagesStateUpdate()
     };
-    this.subscription = API.subscribeToUser(this.props.userId, message =>
-      this.setState(state => ({ messages: [...state.messages, message] }))
-    );
-
+    this.subscribeToUser(this.props.userId);
     this.timerId = setInterval(
       () => this.setState({ timesTamp: new Date() }),
       1000
     );
+  }
+
+  getEmptyMessagesStateUpdate() {
+    return { messages: [] };
+  }
+  subscribeToUser(userId) {
+    this.subscription = API.subscribeToUser(userId, message =>
+      this.setState(state => ({ messages: [...state.messages, message] }))
+    );
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    if (this.props.userId !== nextProps.userId) {
+      console.log("userId gonna changed");
+
+      API.unSubscribe(this.subscription);
+      this.subscribeToUser(nextProps.userId);
+      this.setState(this.getEmptyMessagesStateUpdate());
+    }
   }
 
   componentWillUnmount() {
@@ -39,6 +54,7 @@ class MyCmp extends Component {
     console.log("cmp render");
     const { userId } = this.props;
     const { messages } = this.state;
+    console.log(userId);
     return (
       <div>
         //<div>{this.state.timesTamp.toLocaleTimeString()}</div>
@@ -55,22 +71,23 @@ class MyCmp extends Component {
 
 class App extends Component {
   state = {
-    renderCmp: true
+    renderCmp: true,
+    userId: "1"
   };
   render() {
     console.log("app render");
-    const { renderCmp } = this.state;
+    const { renderCmp, userId } = this.state;
     return (
       <>
         <div>
           <button onClick={() => this.setState({ renderCmp: false })}>
             kill cmp
           </button>
-          {/* <button onClick={() => this.setState({ renderCmp: false })}>
+          <button onClick={() => this.setState({ userId: "2222" })}>
             switch user1
-          </button> */}
+          </button>
         </div>
-        {renderCmp ? <MyCmp userId="10002" /> : <p>good bye</p>}
+        {renderCmp ? <MyCmp userId={userId} /> : <p>good bye</p>}
       </>
     );
   }
